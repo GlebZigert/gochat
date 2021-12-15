@@ -2,11 +2,15 @@ package main
 
 import (
 	"log"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"sync"
 	"text/template"
+	"gochat/trace"
 	"flag"
+	"os"
+
 )
 
 // templ represents a single template
@@ -33,11 +37,15 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
+	fmt.Println(trace.ReverseRunes(".olleH"))
+
 	var addr=flag.String("addr",":8080","the addr of the application.")
 
 	flag.Parse()
 
 	r := newRoom()
+	r.tracer = trace.New(os.Stdout)
+
 	http.Handle("/", &templateHandler{filename: "chat.html"})
 	http.Handle("/room", r)
 	// get the room going
@@ -48,4 +56,5 @@ func main() {
 	if err := http.ListenAndServe(*addr, nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
+	
 }

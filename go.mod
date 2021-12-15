@@ -1,4 +1,4 @@
-module gopath
+module gochat
 
 go 1.15
 

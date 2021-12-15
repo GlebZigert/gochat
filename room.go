@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"github.com/gorilla/websocket"
+	"gochat/trace"
+	"fmt"
 )
 
 const (
@@ -45,6 +47,8 @@ type room struct {
 	leave chan *client
 	// clients holds all current clients in this room.
 	clients map[*client]bool
+
+	tracer trace.Tracer
 }
 
 // newRoom makes a new room that is ready to go.
@@ -54,6 +58,8 @@ func newRoom() *room {
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
+		
+
 	}
 }
 
@@ -63,20 +69,30 @@ func (r *room) run() {
 		case client := <-r.join:
 			// joining
 			r.clients[client] = true
+			fmt.Println("client joined")
+			r.tracer.Trace("New client joined")
+
 		case client := <-r.leave:
 			// leaving
 			delete(r.clients, client)
 			close(client.send)
+			r.tracer.Trace("Client left")
+
 		case msg := <-r.forward:
 			// forward message to all clients
 			for client := range r.clients {
 				select {
 				case client.send <- msg:
+					r.tracer.Trace(" -- sent to client")
+
 				// send the message
 				default:
 					// failed to send
 					delete(r.clients, client)
 					close(client.send)
+					r.tracer.Trace(" -- sent to client")
+
+
 				}
 			}
 		}
