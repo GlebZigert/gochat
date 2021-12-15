@@ -1,30 +1,33 @@
 package trace
 
-
-import(
-"io"
-"fmt"
-
+import (
+	"fmt"
+	"io"
 )
 
 type tracer struct {
 	out io.Writer
-	}
-	func (t *tracer) Trace(a ...interface{}) {
+}
 
-		
-		t.out.Write([]byte(fmt.Sprint(a...)))
-		t.out.Write([]byte("\n"))
+func (t *tracer) Trace(a ...interface{}) {
 
-		}
-		
-	
+	t.out.Write([]byte(fmt.Sprint(a...)))
+	t.out.Write([]byte("\n"))
 
+}
+
+type nilTracer struct{}
+
+func (t* nilTracer) Trace(a ...interface{}){}
+
+func Off() Tracer{
+	return &nilTracer{}
+}
 
 // Tracer is the interface that describes an object capable of
 // tracing events throughout code.
 type Tracer interface {
-Trace(...interface{})
+	Trace(...interface{})
 }
 
 func New(w io.Writer) Tracer {
@@ -40,6 +43,3 @@ func ReverseRunes(s string) string {
 	}
 	return string(r)
 }
-
-
-	

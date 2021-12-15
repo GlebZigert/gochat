@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"github.com/gorilla/websocket"
 	"gochat/trace"
-	"fmt"
+
 )
 
 const (
@@ -58,6 +58,7 @@ func newRoom() *room {
 		join:    make(chan *client),
 		leave:   make(chan *client),
 		clients: make(map[*client]bool),
+		tracer: trace.Off(),
 		
 
 	}
@@ -69,7 +70,6 @@ func (r *room) run() {
 		case client := <-r.join:
 			// joining
 			r.clients[client] = true
-			fmt.Println("client joined")
 			r.tracer.Trace("New client joined")
 
 		case client := <-r.leave:
